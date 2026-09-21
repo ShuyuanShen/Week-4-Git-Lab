@@ -1,12 +1,6 @@
 # Week 4: Git and GitHub!
 
-Studends:
-A
-
 POLS 4130, September 22 and 24, 2026.
-
-Students:
-B
 
 Both meetings begin with brief conceptual slides, then switch once to **Week4_Git_Workshop.md** for demonstrations and practice. GitHub Desktop is the main interface. Keep the guide beside your text editor and Desktop throughout the lab. RStudio can edit the text files, but Git commands belong in a terminal, never the R Console.
 
