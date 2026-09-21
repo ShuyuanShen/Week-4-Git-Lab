@@ -1,4 +1,4 @@
-# Week 4: Git and GitHub!
+# Week 4: Git and GitHub
 
 POLS 4130, September 22 and 24, 2026.
 
