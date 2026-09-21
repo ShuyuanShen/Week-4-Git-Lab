@@ -1,335 +1,225 @@
-# Week 4 Git workshop
+# Week 4 workshop: RStudio with Git and GitHub
 
-POLS 4130. Tuesday, September 22: sections 0–7. Thursday, September 24: sections 8–15.
+Use this guide for setup and troubleshooting. Once connected, open **Week4_RStudio_Git_Lab.R** and stay in its numbered sections for demonstrations and practice. Tuesday uses sections 0–7. Thursday uses sections 8–14. Section 15 contains commented solutions. Version-control practice uses RStudio buttons and GitHub in a browser.
 
-Finish the brief slides, then keep this guide open beside GitHub Desktop and a text editor. The optional `Week4_Git_Commands.sh` uses matching section numbers. Complete an action in Desktop **or** the terminal, then inspect its result. Git commands are not R code.
+## 0. Before class
 
-The assigned preparation is [Git & GitHub Crash Course for Beginners [2026]](https://www.youtube.com/watch?v=mAFoROnOfHs). Use your own viewing notes in the huddle. This guide supplies the selected classroom workflow independently of the video's interface.
+| Piece | Purpose | Check |
+|---|---|---|
+| RStudio Project | Opens the project folder and its R context | Project name appears at top right |
+| Git | Records local file history | RStudio finds a Git executable |
+| GitHub repository | Holds a connected online copy | You can open your own repository |
+| Identity and authentication | Name commits and authorize online access | A test commit and Push succeed |
 
-For each exercise: **PREDICT**, **TRY**, **CHECK**, then **EXPLAIN**. Write short answers in `practice-notes.md`, unless the task names another file. Unless a task asks you to leave edits uncommitted, save and make a separate practice commit before proceeding so each next demonstration starts with no unfinished changes. Worked examples supply their own text. Your practice answers can differ without changing later demonstrations.
+Git and RStudio are separate installations. Use the [Git installation page](https://git-scm.com/downloads) for your operating system. Windows offers an installer. On macOS, an instructor or campus support can help install Git if it is absent. Finish this before the lab.
 
-## 0. Setup and the connection to Week 3
+In RStudio, open **Tools > Global Options > Git/SVN** (some macOS versions expose preferences through the RStudio menu). Enable the version-control interface and confirm RStudio finds Git. Restart after installation if needed. The Git tab appears in a project that uses Git; an ordinary `.Rproj` alone is insufficient.
 
-**USE:** Record how research files change and why. A repository holds a project's files and Git history. Your working tree contains the files you currently edit. A commit records a project snapshot and a message, including the changes selected for that checkpoint.
+Have `readr`, `dplyr`, and `ggplot2` installed using **Packages > Install**. These are familiar packages from earlier labs.
 
-Week 3's `.qmd` is source. Rendering creates its HTML output. Git can record changes to the source, but it does not run R, validate a claim, or prove that rendering succeeds. A complete reproducible project also needs its required data, packages, and instructions.
+### One-time commit identity
 
-Open GitHub Desktop and a plain-text editor. RStudio's Source editor works for Markdown and text. Authenticate Desktop with your own GitHub account for the online steps. Review the commit name and email in Desktop's Git settings. Use your GitHub-provided no-reply email if you want to keep your personal email out of commit metadata.
+Git attaches a name and email to commits. This is separate from GitHub sign-in. If not configured, install `usethis` through **Packages > Install**. With instructor help, run this R expression once in the **R Console**, replacing both examples with your details:
 
-**PREDICT:** If you edit a `.qmd` and save, what has changed in Git history?
-**CHECK:** Nothing enters history until you commit. Nothing reaches GitHub until you successfully publish or push.
-
-## 1. A fresh practice repository
-
-**USE:** Keep the exercise in its own folder, with a known starting state.
-
-In Desktop choose **File > New repository**. Name it `css-practice`. Choose an ordinary local folder outside another Git repository, preferably outside a cloud-sync folder. Select **Initialize this repository with a README**, leave the Git ignore and license choices empty, and create it. Confirm the current branch is `main`; if necessary rename the default branch to `main` before continuing.
-
-Choose **Repository > Show in Finder/Explorer** to locate the actual repository folder. Copy the contents of `starter-project` into it, replacing only the just-created sample README. Include `.gitignore`: show hidden files in your file manager, or create that file in your text editor using the supplied content. Do not copy an entire outer folder into `css-practice`.
-
-In Desktop's **Changes** tab, inspect all five starter files. Select those files and commit with `Add fictional transit starter`. The initial README commit may also appear in history. This guide does not assume a fixed total number of commits.
-
-**CHECK:** The repository root contains `README.md`, `research-question.md`, `practice-notes.md`, `conflict-practice.txt`, and `.gitignore`. Desktop shows no uncommitted changes. History includes `Add fictional transit starter`. Everything remains local.
-
-**G01 (3 minutes):** Locate the folder and the starter commit. In `practice-notes.md`, explain how a folder containing files differs from a repository with recorded history. Save and commit only your note as `Explain repository history`.
-**CHECK:** History contains the new note and the file still appears in the folder.
-**EXPLAIN:** Why would renaming a file `final_v2` be less informative than a history with meaningful messages?
-
-## 2. Saving an edit and reading a diff
-
-**USE:** A diff compares two versions. Removed lines begin with `-`; added lines begin with `+`. These are comparison markers, not characters to paste into the research question.
-
-Open `research-question.md`. Replace `Does social media change politics?` with this worked example:
-
-> What bus reliability concerns appear in fictional transit comments?
-
-Save. Do not commit yet. In Desktop, select the changed file and read its diff. Predict which old line will disappear and which new line will appear.
-
-```diff
--Does social media change politics?
-+What bus reliability concerns appear in fictional transit comments?
+```r
+usethis::use_git_config(
+  user.name = "Your Name",
+  user.email = "your GitHub-associated email"
+)
 ```
 
-**CHECK:** The diff shows the question replacement. The file changes on disk, but the latest commit still contains the broad question. Git records text changes without deciding whether the question is substantively better.
+Use the no-reply email shown in your GitHub email settings if preferred. This sets your Git identity for your computer’s projects. The teaching script does not change it automatically. This is setup in R, not a terminal workflow.
 
-**G02 (4 minutes):** In `practice-notes.md`, write a different, specific question about a social topic you choose. Name a setting, an evidence source, and an analysis task. Inspect that file's diff. Leave the worked question unchanged.
-**CHECK:** Only the question file and your practice notes differ from their previous versions.
-**EXPLAIN:** Which change narrows a research question, and which merely changes wording?
+### One-time GitHub authentication
 
-## 3. Selecting changes and committing
+Create the repository in section 1 first. If a credential manager opens browser sign-in during Clone or Push, complete that sign-in. An ordinary GitHub account password does not authenticate HTTPS Git operations.
 
-**USE:** Select one coherent change for a checkpoint. In the terminal, `git add` places current content in the staging area and `git commit` records it. In Desktop, checked files or lines control what Desktop includes in its next commit. Desktop's checkboxes are its selection interface, not a separate terminal staging step you must also perform.
+If RStudio instead asks for credentials and no working credential manager is available, the instructor can help with a personal access token:
 
-For the worked example, check only `research-question.md`. Leave `practice-notes.md` unchecked. Enter `Narrow transit question` as the commit summary and commit to `main`. Open **History**, choose that commit, and inspect the recorded diff. Then make a separate practice commit for `practice-notes.md`, if changed.
+1. On GitHub, open **Settings > Developer settings > Personal access tokens > Fine-grained tokens > Generate new token**.
+2. Choose an expiration, your account as resource owner, and **Only select repositories**, selecting `css-rstudio-practice`.
+3. Give that repository **Contents: Read and write** access. This exercise edits ordinary files and does not need workflow permissions.
+4. Install `gitcreds` through **Packages > Install**. In the R Console, run `gitcreds::gitcreds_set()` and enter the token only at its interactive credential prompt. Keep it out of scripts, README files, screenshots, and notes. If credentials already exist, read the prompt deliberately rather than replacing another account accidentally.
+5. Retry the operation. If it fails, check the account, repository access, token expiration, and any approval requirement.
 
-Optional terminal equivalent for the worked question, after saving it:
+After this one-time setup, use the Git pane for Commit, Pull, and Push. Retain any existing working institutional sign-in method.
 
-```bash
-git diff -- research-question.md
-git add research-question.md
-git diff --cached
-git commit -m "Narrow transit question"
-```
+### Concepts behind the buttons
 
-`git diff` shows unstaged edits to tracked files. `git diff --cached` shows staged changes. An untracked file may not appear in plain `git diff`; `git status` identifies it. If you edit a file again after staging, add it again only if the new text belongs in the same commit.
+Version control records file changes so we can compare and recover recorded versions. Pro Git’s snapshot diagram shows the state recorded at each commit. Unchanged files reuse stored content. In this lab, changing the R script can leave the data file unchanged.
 
-**CHECK:** History records the question with its message. After recording any separate practice notes, Changes is empty. GitHub still has no copy of these commits unless you already published and pushed.
+![Project snapshots over time](screenshots/git-snapshots.png)
 
-**G03 (4 minutes):** Add a sentence under `## Revision notes` explaining that the question is descriptive. Save, inspect, and commit only that change with a useful message.
-**CHECK:** A distinct commit contains only the intended revision note.
-**EXPLAIN:** Why does `Clarify descriptive purpose` tell a future reader more than `fixed it`?
+*Chacon and Straub, Pro Git, 2nd edition, §1.3, Figure 5. CC BY-NC-SA 3.0. Original diagram.*
 
-## 4. History and evidence of a change
+![Working files, staging, and local history](screenshots/git-areas.png)
 
-**USE:** Find what changed, when, and with which explanation. The commit identifier is a reference to the recorded snapshot. Your identifier and time will differ from anyone else's.
+*Pro Git, §1.3, Figure 6. CC BY-NC-SA 3.0. Original labels retained. In RStudio: Save changes the working file; Staged selects a version; Commit records it in local history. The hidden .git directory stores that history. Checkout means putting a recorded version into the working files, as when switching branches.*
 
-Open History and inspect `Narrow transit question`. Compare its diff with the current file. Later commits may add text beyond that historical snapshot. A clean working tree means no uncommitted tracked changes or visible untracked files remain; it does not mean a report is correct or all commits are online.
+## 1. Connect GitHub to an RStudio Project
 
-Optional inspection:
+A **repository** stores project files and the history Git records through commits. A local repository is on your computer. A remote repository is a connected repository elsewhere; here it is on GitHub. RStudio provides the interface to the local project and Git.
 
-```bash
-git status --short
-git log --oneline -5
-git show --stat HEAD
-```
+1. In a browser, sign into GitHub and create `css-rstudio-practice`. Select **Private** and **Add a README file**. Leave the license and Git ignore template unset for now; the starter includes `.gitignore`.
+2. Open **Code > HTTPS** and copy the repository URL.
 
-`HEAD` names the current commit in this ordinary branch workflow. The status command prints no file entries when the working tree and staging area are clean. Log displays recent commit identifiers and messages.
+![GitHub HTTPS address](screenshots/github-clone.png)
 
-**G04 (3 minutes):** Show a partner one focused commit. Ask them to explain the change from its message and diff before you describe it.
-**CHECK:** They identify the changed file and the substantive revision.
-**EXPLAIN:** What can the history show that a final rendered HTML file alone cannot?
+*Happy Git documentation example. Copy your own address, not the one pictured.*
 
-## 5. A README and an ignore file
+3. In RStudio, select **File > New Project > Version Control > Git**.
+4. Paste the URL into **Repository URL**. Choose a local parent folder outside the course download and any existing repository. Prefer a local working folder rather than a folder actively synchronized by Box, OneDrive, or iCloud. Let RStudio create the project directory.
+5. Click **Create Project**. Find README, the generated `.Rproj`, the **Git** tab, and branch `main`. If you customized your GitHub default branch, use that name consistently wherever this guide says `main`.
+6. Use Finder or File Explorer to copy the **contents** of the downloaded `starter-project` into the clone. Replace the initial README with the supplied project README. Include `.gitignore` and `data`. Keep the clone-generated `.Rproj`; do not copy another `.Rproj` or a `.git` directory from the teaching folder. On macOS, Command-Shift-period shows hidden files. Alternatively, create `.gitignore` in RStudio’s text editor using the supplied contents.
+7. Open `Week4_RStudio_Git_Lab.R` from this connected folder.
 
-**USE:** Help someone continue the project and keep local clutter out of new commits.
+**Check:** script, README, `.Rproj`, and `data` sit together in the clone. Git lists the new files and the branch is `main`. Cloning has configured a remote named `origin`: the connection to your GitHub repository.
 
-A README introduces a repository. Add this worked sentence under `## Proposed approach` in the project's README:
+A clone includes history and a remote connection. A ZIP contains files without Git history. An `.Rproj` establishes RStudio’s working folder; it does not by itself add Git.
 
-> We would classify fictional comments by concern and compare the categories.
+## 2. Baseline analysis and the Git pane
 
-Keep the statement that no data have been collected. Save, inspect, and commit as `Describe proposed analysis`.
+Run script sections 1–2. The baseline selects 2007, gives 142 country observations and five continent groups, and plots GDP per capita against life expectancy.
 
-Open the supplied `.gitignore`. It lists filename patterns for untracked files Git should ignore. Its core R patterns are:
+![Source editor and Git pane in RStudio](screenshots/rstudio-overview.png)
 
-```text
-.Rhistory
-.RData
-.Rproj.user/
-.DS_Store
-```
+*Posit documentation example. Its filenames and “no branch” state differ from our connected main branch. Pane placement and icons may vary by version.*
 
-Commit `.gitignore` itself so collaborators receive the same rules. It does not remove files that Git already tracks or erase earlier history. The supplied file also ignores `scratch/` for disposable notes. Do not put required code or data in that folder.
+Save. In **Git**, inspect the starter files, then tick **Staged** for the script, `.Rproj`, README, `.gitignore`, data, and practice fixtures. Click **Commit**, enter `Add baseline R analysis`, and commit. **Push** and refresh GitHub to verify the files arrived. This is the baseline checkpoint.
 
-**G05 (5 minutes):** Create a `scratch` folder and save a harmless `notes.txt` inside it. In Desktop, verify the file is absent from Changes. Then improve one instruction in README and commit that README change.
-**CHECK:** README appears in the commit, while the scratch file remains on disk and untracked. The optional command `git check-ignore -v scratch/notes.txt` names the matching rule.
-**EXPLAIN:** Why does an ignore rule help with clutter but fail to make committed private data safe?
+## 3. Save, diff, stage, commit
 
-Track the source and shareable files needed to reproduce work. Review the contents before publishing. Keep passwords, tokens, private participant information, and material without sharing permission out of the repository. A rendered report can be shared separately or tracked for a deliberate publishing workflow; it cannot replace its source and inputs.
+Follow script section 3: change `analysis_year` from 2007 to 1997 and rerun sections 1–2. Save, select the file in Git, and click **Diff**.
 
-## 6. A remote and the first publication
+![RStudio Review Changes window](screenshots/rstudio-commit.png)
 
-**USE:** Connect local history to a hosted repository. A remote is a named connection to another repository. `origin` is the conventional name used here. GitHub hosts the remote. GitHub Desktop operates on your local repository and exchanges commits with it.
+*Posit example. Our file is Week4_RStudio_Git_Lab.R and our message is Compare life expectancy in 1997.*
 
-In Desktop choose **Publish repository**. Check your own account, the `css-practice` name, and **Keep this code private**. Publish and choose **View on GitHub**. Confirm README and `Narrow transit question` appear on the correct branch. A private repository still needs careful content choices.
+- **Save** writes edits to the local file.
+- **Diff** displays additions and removals relative to another version.
+- **Staged** selects saved changes for the next commit.
+- **Commit** records the staged snapshot and message in local history.
+- **Push** sends local commits to the remote branch.
 
-After this first publication, **Push origin** sends later local commits. **Fetch origin** retrieves information about remote commits without combining them into your working branch. **Pull origin** retrieves and integrates remote changes into that branch. Desktop may show different buttons depending on whether there are commits to send or receive.
+Read the diff, tick Staged, inspect the staged change, enter the message, and Commit. Leave **Amend previous commit** unchecked. If you edit after staging, inspect and stage that newer edit too.
 
-**G06 (5 minutes):** Add a short project limitation to README and commit it. Before pushing, compare Desktop History with GitHub's commit list. Then push and refresh the browser.
-**CHECK:** The new commit appears online after a successful push. The local and online file contents agree on `main`.
-**EXPLAIN:** Why can Changes be empty while GitHub still lacks your latest work?
+**Check:** the diff records one year change. Rerunning checks the analytical effect. An empty Git pane does not prove correctness or successful sharing.
 
-**No-login fallback:** Complete the local commit and show its diff to a partner. Record that online verification remains unfinished. Do not claim a push occurred. Continue local work and return to publication when sign-in or connectivity works.
+## 4. History
 
-## 7. Combined application and troubleshooting
+Use Git’s **History** clock icon, the Git menu’s History option, or History in Review Changes. Select a commit and file to see the recorded change. The message explains its purpose; the diff shows its content. The main RStudio **History** pane lists R expressions, while **Git History** lists commits. Use Git History here.
 
-**G07 (8–10 minutes):** Create `question-extension.md` for a different topic of your choice. State a question and the evidence you would need. Make one focused commit. Add a limitation in a second commit. Push if connected, and ask a partner to find both changes.
-**CHECK:** Two readable diffs show two coherent changes. The project remains explicitly hypothetical. Your proposed evidence fits your question.
-**EXPLAIN:** Does recording a research design establish that its causal claim is justified?
+## 5. Push and pull
 
-If something is missing, locate the state before repeating actions:
+![Git pane controls](screenshots/rstudio-git-pane.png)
 
-| Observation | Check |
+*Posit example. Down arrow: Pull. Up arrow: Push. The example predates its first commit, so some controls are disabled. Our clone has a branch and remote.*
+
+Push from RStudio, then verify the correct branch, message, and source on GitHub. Add the connection-check line to README in GitHub’s browser editor and commit directly to `main`. With a clean Git pane locally, **Pull** and inspect README. Script section 5 gives the exact text.
+
+Push sends commits to the remote. Pull retrieves remote changes and integrates them into the current local branch. This is deliberate synchronization, not continuous background sharing.
+
+## 6. Ignored files
+
+Run section 6 to save the plot. It appears in **Files** under `outputs/` and stays absent from **Git** because `.gitignore` excludes that directory. Track the script and input so a collaborator can recreate it. Track `.gitignore` itself.
+
+Session files such as `.Rproj.user/`, `.Rhistory`, and `.RData` stay local. Keep the `.Rproj` settings file in Git. Ignore rules do not remove already tracked files or erase earlier commits.
+
+## 7. Tuesday handoff
+
+Complete G07: update README to describe the current 1997 analysis and one interpretation detail. Save, Diff, Stage, Commit, Push, and verify online. Commit practice notes separately. End on clean `main`.
+
+## 8. Thursday starting point
+
+Reopen the same connected `.Rproj`. Finish pending edits, confirm `main`, and Pull. Rerun sections 1–2 and 6. Verify 1997 and 142 rows. The saved script is authoritative; the Environment may still contain objects from before a branch switch or Pull.
+
+## 9. A branch in RStudio
+
+A branch is a line of development in a repository. It lets a proposal accumulate commits before joining accepted work on `main`.
+
+1. On clean, current `main`, click **New Branch** beside Git’s branch selector.
+2. Name it `clarify-labels`. Select remote **origin** if asked. Create and confirm the branch name.
+3. Make the two label edits in script section 9. Rerun, save, inspect Diff, stage, commit `Clarify plot units`, and Push.
+4. With no pending edits, use the branch dropdown to inspect `main`, then return to `clarify-labels`. Rerun after switching. Both branches use the same project folder.
+
+**If branch controls differ:** create `clarify-labels` from `main` using GitHub’s branch dropdown. In RStudio on clean `main`, Pull to refresh remote branches. Select `origin/clarify-labels` in the branch dropdown and accept creation of a local tracking branch if prompted. If absent, reopen the project and ask the instructor to check the connection.
+
+**Check:** labels change; year and country count do not. The proposal branch appears on GitHub after Push.
+
+![A branch adds a commit while sharing earlier history](screenshots/git-branch.png)
+
+*Pro Git, §3.2, Figure 20. CC BY-NC-SA 3.0. Original labels: master is analogous to our main, iss53 to clarify-labels, and C3 to our label-change commit. Arrows from commits point toward their parent history.*
+
+## 10. Pull request and review
+
+A **pull request** proposes bringing one branch’s changes into another and provides a review space. **Pull** updates your local branch from a remote.
+
+1. After Push, click **Compare & pull request** on GitHub, or **Pull requests > New pull request**.
+2. Confirm **base: main** and **compare: clarify-labels**. Use the title and explanation in script section 10, then create the request.
+3. Open **Files changed** with a partner. Check units, intended scope, and the successful R rerun.
+4. Revise in RStudio on `clarify-labels` if needed. Save, review, stage, commit, and Push. The existing request updates.
+
+![Pull request banner](screenshots/github-pr.png)
+
+![Files changed tab](screenshots/github-review.png)
+
+*GitHub documentation examples. Our proposed branch is clarify-labels.*
+
+A partner can review a private solo repository on the owner’s screen and give verbal feedback. Record it in the PR description. Authors cannot approve their own requests. Separate-account reviews or edits require access granted by the owner. Do not share logins.
+
+A **fork** is a separate repository on GitHub, often used when you cannot contribute directly to an original. Our lab needs no fork.
+
+## 11. Merge, pull, rerun
+
+After review, the owner clicks **Merge pull request** and confirms. In RStudio, verify no unfinished edits, select local `main`, and Pull. Rerun and inspect. Both axes now state units, the year remains 1997, and there are 142 countries.
+
+Browser Merge changes online `main`. Pull updates local `main`. Running R recreates its objects and plot. Check all three. A successful merge does not establish analytical correctness.
+
+## 12. Conflict interpretation
+
+Use `conflict-practice.txt`. It contains **typed example markers**, not a real unresolved Git merge. Do not run it as R. Choose the intended year and replace the whole marker block with the correct assignment. Follow script section 12.
+
+If a real Pull conflict occurs, Git identifies an unresolved file. Open it in RStudio, agree on the intended analysis, remove markers and unwanted text, save, stage the resolved file, and finish the merge commit. Rerun and inspect before Push. Ask for help when the state is unclear. The simulation practices a content decision; it does not demonstrate completion of a real merge.
+
+## 13. Recovery
+
+Use the harmless README exercise in the script. RStudio’s **Revert** for selected changes discards uncommitted edits. Inspect the diff and confirmation carefully; uncommitted text has no Git checkpoint.
+
+For the committed typo, inspect History, edit the correct text, and make a new correction commit. Both mistake and repair stay visible. This workflow uses ordinary edits and commits.
+
+## 14. Handoff
+
+A partner should find the question, source, year, script, and run instructions, then explain and rerun the plot. Write one next task with a concrete success check. Push and verify final notes on `main`. No additional file upload is required.
+
+## Troubleshooting and offline work
+
+| Symptom | Check and next step |
 |---|---|
-| No edit in Changes | Save the file, confirm repository folder and current branch, then inspect ignore rules. |
-| No edit in History | You may have saved without committing, or left the file unchecked. |
-| Commit absent online | Confirm account, repository, branch, and successful publish/push. |
-| New file absent from plain `git diff` | Inspect `git status`; it may be untracked. |
-| Push rejected or updates requested | Stop new edits. Fetch and inspect the remote changes, then integrate deliberately. Avoid force pushing. |
-| Terminal cannot find Git | Use Desktop for the main route, or install command-line Git before the optional route. |
-
-Before Thursday, finish or separately commit your practice notes. No particular G07 answer is required next time.
-
-## 8. Returning to a project: clone and synchronize
-
-**USE:** Begin collaboration from a known current version.
-
-Open Tuesday's `css-practice` in Desktop. Select `main`. Check that Changes is empty. Fetch and pull if Desktop offers incoming changes. Inspect the question and README. You do not need to clone a repository you already have locally.
-
-A **clone** creates a new local repository from an existing one, including history and a connection to its source. In Desktop, **File > Clone repository** downloads your existing GitHub repository into a new, empty destination when you need another working copy. A ZIP download contains files without Git history. A **fork** creates a separate repository on GitHub, useful for proposing changes where you cannot write directly. A fork still needs a clone for local work. This class uses your own repository and does not require a fork.
-
-**If Tuesday was missed:** Complete sections 0–1, then perform the worked edits and commits in sections 2–3 and 5. Publish through section 6 if connected. Skip practice answers for now.
-
-**G08 (3 minutes):** Explain which operation fits each situation: continuing in Tuesday's folder, working on a second computer, and contributing to someone else's project without write access.
-**CHECK:** Reopen and synchronize; clone; fork then clone are the respective choices for this workflow.
-**EXPLAIN:** Why would downloading a ZIP be insufficient for inspecting earlier commits?
-
-## 9. A branch for one proposed change
-
-**USE:** Develop a change along a separate line of history before merging it into `main`.
-
-In Desktop, starting from clean `main`, select **Current Branch > New Branch**. Name it `clarify-method` and create it from `main`. In `research-question.md`, add:
-
-```text
-## Proposed method
-We would label each fictional comment by its main concern.
-We would compare concern categories without claiming causation.
-```
-
-Save, inspect, and commit as `Explain proposed coding method`. The branch shares earlier history with `main`, then records this new commit. Switching branches changes which committed version appears in the same folder. You do not need a duplicate folder.
-
-**CHECK:** With no uncommitted edits, switch to `main`: the new method is absent. Switch back to `clarify-method`: it reappears. Finish on `clarify-method`. Do not move unfinished edits between branches to perform this check.
-
-**G09 (4 minutes):** On `clarify-method`, add one sentence acknowledging that different coders might disagree. Commit it separately.
-**CHECK:** The branch contains the method and limitation. `main` still lacks both.
-**EXPLAIN:** How does the branch let another person review a change before it becomes part of `main`?
-
-## 10. A pull request and review
-
-**USE:** A pull request (PR) proposes combining changes into a destination branch. It supports review before a merge. It is a GitHub workflow, distinct from pulling remote changes into a local branch.
-
-On `clarify-method`, choose **Publish branch** or **Push origin** as appropriate. Use **Preview Pull Request**, verify base `main` and compare `clarify-method`, then **Create Pull Request** to continue in the browser. Describe the method addition and why it helps a reader. Inspect **Files changed** before opening the request.
-
-A partner can review on your screen. They do not need access to the private repository for this route. If they use a separate account for an online review, they need appropriate repository access. The author cannot formally approve their own PR. A verbal classroom review is a real peer check, but is not a recorded GitHub approval.
-
-**G10 (6 minutes):** Ask a partner to inspect the question, method, and limitation. Have them identify one unclear phrase. Revise it on the same branch, commit, and push.
-**CHECK:** The existing PR displays the new revision. No second PR is needed. The reviewer can explain how the method addresses the question.
-**EXPLAIN:** Why does a successful automatic merge not prove the proposed analysis is valid?
-
-**Offline fallback:** Compare `clarify-method` with `main` in Desktop and review the diff together. Record feedback locally. Section 11 gives a local merge route. This substitutes for reviewing and combining a change, but does not create an online PR.
-
-## 11. Merge and update the local main branch
-
-**USE:** A merge combines development histories. After an online merge, your local `main` needs an update.
-
-On GitHub, recheck the PR's base and Files changed. Once the classroom review is addressed, merge the request using the available merge option and confirm. If repository rules block merging, resolve the stated requirement instead of bypassing it. In Desktop, select `main`, fetch, and pull. Open the file locally.
-
-**CHECK:** `main` now includes the proposed method. Local and online text agree. A squash merge may create a different commit identifier from the branch's original commits, so compare the accepted content as well as the history.
-
-For the offline route only: with no uncommitted edits, switch to `main`. Under **Current Branch**, choose the option to merge a branch into `main`, select `clarify-method`, and merge. Inspect the local file. This merges locally; it does not mark an online PR as reviewed or merged. Push when online if you chose this route, and inspect any existing PR before proceeding further.
-
-**G11 (4 minutes):** Locate the accepted method in local `main` and, if online, GitHub's `main`. Explain which action updated each location.
-**CHECK:** Both copies show the accepted method when synchronized.
-**EXPLAIN:** Why did merging in the browser leave the local file unchanged until synchronization?
-
-## 12. Conflict markers and a decision about meaning
-
-**USE:** Git reports a merge conflict when it cannot combine changes automatically. Editing different lines often merges cleanly; overlapping edits or edit/delete disagreements can require a person to decide.
-
-Open `conflict-practice.txt`. Its first line explicitly calls it a **simulation**. The marker block represents a fictional merge into a branch containing the reliability wording:
-
-```text
-<<<<<<< HEAD
-We study bus reliability concerns.
-=======
-We study bus accessibility concerns.
->>>>>>> other-branch
-```
-
-For this ordinary merge example, the first side is the current branch and the second is the incoming branch. Those meanings depend on the operation; do not treat them as universal labels for local and remote data. Read the branches and context. The words inside the markers disagree about the study's scope.
-
-**G12 (6 minutes):** Decide whether the project should study reliability, accessibility, or explicitly compare both. Replace the entire marker block with one coherent paragraph. Keep the simulation disclosure. Save, inspect, and commit as `Resolve simulated scope disagreement`.
-**CHECK:** No marker lines remain in that file. The final paragraph matches the chosen scope. Desktop does not report an unresolved merge because this file was never in an actual conflicted Git state.
-**EXPLAIN:** Why could blindly keeping both versions produce a worse research design?
-
-Section 15 creates a real conflict in a separate disposable repository. In an actual conflict, editing the text alone is insufficient: you must also mark it resolved and complete the merge.
-
-## 13. Recovery that preserves history
-
-**USE:** Revert a committed mistake by making a new commit that reverses its changes. The original commit stays visible. An uncommitted edit has no checkpoint to revert; inspect its diff and preserve valuable text before discarding anything.
-
-**G13 (5 minutes):** On clean `main`, create `recovery-demo.txt` with the harmless text `This is a temporary practice file.` Commit only that file as `Add recovery demonstration`. Immediately open History, right-click that new commit, and choose **Revert Changes in Commit**. Inspect the new commit and the folder.
-**CHECK:** The original commit and a new reversing commit both appear. The temporary file is absent. Your research question is unchanged. Push the resulting history if connected.
-**EXPLAIN:** Why does revert help collaborators understand a correction?
-
-The optional command route uses `git revert --no-edit HEAD` only when `HEAD` is exactly the isolated demonstration commit. Do not apply it to whichever real project commit happens to be latest. Avoid reset, force push, or rewriting shared history in this workshop.
-
-## 14. An issue and a project handoff
-
-**USE:** An issue records a problem, question, or planned improvement. It can exist before anyone has code ready. A PR proposes an actual branch change. A useful issue states the expected result, current problem, and a way to check completion.
-
-**G14 (8 minutes):** Ask a partner to find the project's question, latest accepted method, and next improvement. Improve README if any is hard to locate. Open an issue on your own practice repository for one remaining improvement, or write it in `practice-notes.md` offline.
-
-Example issue title: `Define the concern categories`. Description: `The method says we will label comments, but no category definitions exist yet. Add definitions and one fictional example per category. A second reader should be able to apply each definition.`
-
-**CHECK:** A new reader can find the purpose and next action. The issue describes a checkable task. Any README change has its own reviewed diff and commit.
-**EXPLAIN:** Which future change would need an issue, a PR, or both?
-
-For next week's website, Quarto will build pages from source, Git will record source history, and GitHub Pages will host the site. Publication is a later workflow. This week does not publish a website.
-
-## 15. Optional extension: a real merge conflict
-
-**USE:** Distinguish a text simulation from an actual unresolved merge. Allow 10–15 minutes. Use the commands in section 15 of `Week4_Git_Commands.sh` in Terminal or Git Bash. They create `css-conflict-demo` as a **new sibling folder outside all other repositories**. If the name already exists, choose a new name rather than reusing it. No remote is involved.
-
-The sequence creates one baseline line, creates branch `accessibility`, changes the same line on that branch, returns to `main`, and changes the line differently there. Merging `accessibility` into `main` deliberately stops with a conflict.
-
-**PREDICT:** Why can Git not choose the study's scope for us?
-**CHECK before editing:** `git status --short` displays `UU scope.txt`. `git diff --name-only --diff-filter=U` displays `scope.txt`. The file contains markers. These Git states distinguish it from section 12's simulation.
-
-Edit the file to one intended sentence and remove the markers. In this example, write `We compare bus reliability and accessibility concerns.` Then stage `scope.txt` and complete the merge with the supplied commit command.
-
-**CHECK after committing:** Status has no file entries, the unresolved-file command prints nothing, and the log shows both branches' work and a merge commit. Read the sentence too. A clean Git state does not judge the research design.
-
-## 16. Suggested solutions and interpretation checks
-
-Try each practice before reading its solution. Exact wording can vary. These are examples and checking criteria, not required findings.
-
-<details>
-<summary>G01–G04: local history</summary>
-
-- **G01:** A repository links files to recorded snapshots and explanations. File names alone do not establish ancestry or the content of each revision.
-- **G02:** Example: `Which service problems recur in fictional comments about city buses?` This names a setting, evidence, and classification task. The diff should show only the intended text edits.
-- **G03:** Example revision note: `This question describes stated concerns and does not estimate an effect on behavior.` Commit summary: `Clarify descriptive purpose`.
-- **G04:** The selected diff shows the old broad question and new narrow question. A rendered file communicates the current result but ordinarily lacks that sequence of source decisions.
-
-</details>
-
-<details>
-<summary>G05–G08: sharing and copies</summary>
-
-- **G05:** `scratch/notes.txt` matches `scratch/` and stays untracked. README remains trackable. Ignore patterns do not remove committed content or replace a sharing decision.
-- **G06:** A local commit may be ahead of the remote even with no unfinished edits. A successful push makes the new commit available on the remote branch.
-- **G07:** A first commit could add a question about fictional housing comments. A second could explain that those comments would not represent all residents. Clear history documents decisions without validating the design.
-- **G08:** Reopen and synchronize an existing local copy. Clone for a new local copy. Fork then clone when a separate hosted repository is needed for contributions without direct write access.
-
-</details>
-
-<details>
-<summary>G09–G11: review and merge</summary>
-
-- **G09:** Example: `Two coders may interpret an ambiguous comment differently.` It should appear on `clarify-method` and remain absent from `main` before the merge.
-- **G10:** A reviewer could ask what `main concern` means for a comment mentioning two problems. Clarify the coding rule and push to the same branch. The PR updates to include the change.
-- **G11:** GitHub's merge changes remote `main`. Switching to local `main` and pulling brings the accepted change into that local branch. A local offline merge combines the branches locally instead.
-
-</details>
-
-<details>
-<summary>G12–G14: conflict, recovery, and handoff</summary>
-
-- **G12:** A valid comparison solution is `We compare bus reliability and accessibility concerns in fictional transit comments.` Keeping only one scope can also be valid if justified. Remove all three marker lines and both competing original lines. Keep the fictional simulation disclosure.
-- **G13:** The added temporary file disappears after revert. Two history entries remain: the original addition and its reversal. No unrelated source file should change.
-- **G14:** A new reader should locate a descriptive question, hypothetical data, proposed labeling method, and one remaining checkable task. An issue records the task. A later PR proposes a change that addresses it.
-
-</details>
-
-## Sources and further help
-
-Official documentation checked September 19, 2026. Interface labels may vary slightly by platform or app version.
-
-- [First repository in GitHub Desktop](https://docs.github.com/en/desktop/overview/creating-your-first-repository-using-github-desktop)
-- [Reviewing and committing changes](https://docs.github.com/en/desktop/making-changes-in-a-branch/committing-and-reviewing-changes-to-your-project-in-github-desktop)
-- [Git status](https://git-scm.com/docs/git-status) and [Git diff](https://git-scm.com/docs/git-diff)
-- [Ignoring files](https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files)
-- [Synchronizing a branch](https://docs.github.com/en/desktop/working-with-your-remote-repository-on-github-or-github-enterprise/syncing-your-branch-in-github-desktop)
-- [Creating a pull request or issue](https://docs.github.com/en/desktop/working-with-your-remote-repository-on-github-or-github-enterprise/creating-an-issue-or-pull-request-from-github-desktop)
-- [Merge conflicts](https://docs.github.com/en/pull-requests/reference/merge-conflicts)
-- [Reverting a commit in Desktop](https://docs.github.com/en/desktop/managing-commits/reverting-a-commit-in-github-desktop) and [Git revert](https://git-scm.com/docs/git-revert)
+| No Git tab | Open the connected `.Rproj`; confirm Git detection in Git/SVN preferences. Reopen the clone rather than initializing the download folder. |
+| CSV missing | Open the clone’s `.Rproj`; data/gapminder.csv belongs directly under that folder. |
+| Nothing to commit | Save first; check whether the change is already committed or ignored. |
+| Commit needs identity | Complete section 0’s one-time identity setup. |
+| Push disabled | Check the connected clone, current branch, and remote origin. Ask for help if the connection is absent. |
+| Authentication fails | Check account, token expiration, repository permission, and setup. An account password alone is insufficient for HTTPS Git. |
+| Push rejected because online work is newer | Finish/commit local edits, Pull, inspect and rerun, then Push. Stop for help if a conflict appears. |
+| Branch switch blocked | Save and commit meaningful work, or deliberately discard only an unwanted edit. Switch from a clean state. |
+| Plot still old after Pull | Verify saved source and branch, then rerun sections 1–2 and 6. Environment objects do not update automatically. |
+| Internet unavailable | Continue local analysis, commits, History, and branch practice. Review on screen. Mark online steps unfinished and complete them after access returns. |
+
+For a fully offline start, copy starter-project to a new local folder. Use **File > New Project > Existing Directory**, then **Tools > Project Options > Git/SVN**, select Git, confirm initialization, and restart. Make a local baseline commit. This is local practice without a remote. Later create and clone the online repository; the instructor can help carry over working files. Local comparison does not complete a GitHub pull request.
+
+## Sources and screenshot credits
+
+The course examples adapt these workflows. Documentation screenshots retain their source filenames and labels. Accessed September 21, 2026.
+
+- [Posit: version control](https://docs.posit.co/ide/user/ide/guide/tools/version-control.html): [overview](https://docs.posit.co/ide/user/ide/guide/tools/images/rstudio-vcs-pane-labeled.png), [Git pane](https://docs.posit.co/ide/user/ide/guide/tools/images/git-tab.png), [Review Changes](https://docs.posit.co/ide/user/ide/guide/tools/images/git-commit-pane.png).
+- [Posit: RStudio Projects](https://docs.posit.co/ide/user/ide/guide/code/projects.html).
+- [Happy Git: GitHub first](https://happygitwithr.com/new-github-first), [HTTPS screenshot](https://happygitwithr.com/img/github-https-or-ssh-url-annotated.png), [identity](https://happygitwithr.com/hello-git), [credentials](https://happygitwithr.com/https-pat), [branches](https://happygitwithr.com/git-branches).
+- [GitHub: personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
+- [GitHub: creating a pull request](https://docs.github.com/en/pull-requests/how-tos/create-pull-requests/creating-a-pull-request), [reviewing changes](https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/reviewing-proposed-changes-in-a-pull-request). The banner and Files changed screenshots come from these pages.
+- [Git: repositories](https://git-scm.com/book/en/v2/Git-Basics-Getting-a-Git-Repository), [recording changes](https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository), [ignore rules](https://git-scm.com/docs/gitignore).
+- [GitHub: conflicts](https://docs.github.com/en/pull-requests/reference/merge-conflicts), [forks](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
+- [Gapminder teaching extract](https://github.com/jennybc/gapminder), copied unchanged from Week 3.
+- Assigned [Git & GitHub Crash Course](https://www.youtube.com/watch?v=mAFoROnOfHs). Huddles retrieve viewing notes; classroom practice uses RStudio.
+
+- Chacon and Straub, [Pro Git §1.1: version control](https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control), [§1.3: What is Git?](https://git-scm.com/book/ms/v2/Getting-Started-What-is-Git%3F), and [§3.2: branching](https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging). Diagrams reproduced from the [official book source](https://github.com/progit/progit2/tree/main/images) under [CC BY-NC-SA 3.0](https://creativecommons.org/licenses/by-nc-sa/3.0/).

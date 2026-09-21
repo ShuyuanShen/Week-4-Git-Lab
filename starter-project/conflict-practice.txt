@@ -1,7 +1,9 @@
-FICTIONAL SIMULATION: Git is not actually in a conflicted state.
+TEXT SIMULATION ONLY. These markers were typed for practice.
+Git has not reported an unresolved merge. Do not run this file as R.
+
+The accepted research question uses 1997. Decide the intended line below.
 <<<<<<< HEAD
-We study bus reliability concerns.
+analysis_year <- 1997
 =======
-We study bus accessibility concerns.
+analysis_year <- 2002
 >>>>>>> other-branch
-Decide the research scope and replace the marker block with a clear paragraph.
