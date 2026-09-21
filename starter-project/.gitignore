@@ -1,0 +1,11 @@
+# Local R and RStudio state
+.Rhistory
+.RData
+.Rproj.user/
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db
+
+# Disposable practice notes only; keep required source and data elsewhere
+scratch/

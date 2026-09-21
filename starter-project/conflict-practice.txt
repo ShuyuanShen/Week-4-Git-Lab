@@ -1,0 +1,7 @@
+FICTIONAL SIMULATION: Git is not actually in a conflicted state.
+<<<<<<< HEAD
+We study bus reliability concerns.
+=======
+We study bus accessibility concerns.
+>>>>>>> other-branch
+Decide the research scope and replace the marker block with a clear paragraph.
