@@ -1,5 +1,8 @@
 # Week 4: Git and GitHub!
 
+Studends:
+A
+
 POLS 4130, September 22 and 24, 2026.
 
 Students:
