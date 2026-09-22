@@ -1,21 +1,50 @@
 # Week 4: version control and collaboration in RStudio ==========================
 # POLS 4130 | September 22 and 24, 2026
-# First follow Week4_Git_Workshop.md, sections 0-1. Work in your cloned project.
-# Use the Source editor and Run for R; use the Git pane for version control.
+# First follow Week4_Git_Workshop.md, sections 0-1. Work in your initialized or cloned practice project.
+# Use Run for R, the Git pane for ordinary version control, and Terminal for git commands.
 # Each practice: predict, act, inspect, explain. Solutions are commented at end.
 # Tuesday: sections 0-7. Thursday: sections 8-14. No Quarto prerequisite.
 # Source runs the analysis and saves a plot. It performs no Git operations.
 
 # 0. One-time setup and orientation --------------------------------------------
 # Use Week4_Git_Workshop.md to prepare Git, identity, and GitHub sign-in.
-# This file belongs in your css-rstudio-practice clone beside its .Rproj file.
+# This file belongs in css-rstudio-practice beside its .Rproj file.
+# 0A. Git setup: in RStudio's Terminal, run git --version. Complete installation
+# if needed, then Tools > Global Options > Git/SVN should detect Git.
+# 0B. In Terminal, configure your own name/email once (replace both examples):
+# git config --global user.name "Your Name"
+# git config --global user.email "you@example.com"
+# git config --global init.defaultBranch main
+# Verify with git config --get user.name and git config --get user.email.
+# These are Terminal commands, not R code. Full commands: Week4_Git_Terminal.txt.
+# G00A: Check your configured identity. Explain why it does not sign in to GitHub.
+#
+# 0C. Guide Path A: copy starter-project to your own new practice folder.
+# File > New Project > Existing Directory opens it as an RStudio project.
+# Tools > Project Options > Git/SVN > Git initializes its local repository.
+# Run sections 1-2 below, then review, stage and Commit the baseline in Git.
+# Create an EMPTY GitHub repository, add its URL as origin in Terminal, and use
+# git push -u origin main for the first push. The guide supplies exact steps.
+# G00B: Check History and GitHub. Explain what initialization, commit, and Push add.
+# Guide Path B is the alternative: create a GitHub repo with README, then clone.
+# Choose A or B for this analysis, so you do not create competing copies.
+#
+# 0D. Guide Path C: fork the course website on GitHub, then use RStudio's
+# File > New Project > Version Control > Git to clone YOUR fork into a separate
+# folder. In that project's Terminal, git remote -v should show your account.
+# Personalize only the README heading, then Diff, stage, Commit, Push and check.
+# G00C: Name the owner of origin. Did your Push change the instructor's repository?
+# Return to this analysis project's .Rproj before continuing below.
+# Never paste a token into this script. The R Console helper gitcreds::gitcreds_set()
+# accepts it at an interactive prompt if your credential manager needs setup.
 # Find the project name at the top right, the Files pane, and the Git tab.
 # A repository holds project files and the Git history recorded by commits.
 # Version control lets us compare and recover recorded versions. A commit
 # records a project snapshot; unchanged files reuse existing stored content.
 # The guide includes Pro Git diagrams for snapshots, staging, and branches.
 # An .Rproj file gives RStudio its project context; it is not the Git history.
-# G01: In practice-notes.md, explain how this clone differs from a ZIP download.
+# G01: Explain what initializing adds to a folder, and what cloning supplies
+# that downloading a ZIP does not. Use practice-notes.md for your short answers.
 # CHECK: README.md is present, the Git tab is visible, and the branch is main.
 
 # 1. Read the same historical data used in Week 3 -------------------------------
@@ -68,7 +97,8 @@ print(life_plot)
 # CHECK: In 2007, nrow(year_data) is 142 and the summary has five rows.
 # EXPLAIN: The log scale changes the spacing of x values, not the stored data.
 # A continent mean here gives every country equal weight, not every person.
-# Before editing: Save. In Git, review the starter files, tick Staged, Commit
+# If Path A already recorded the baseline, verify it in History and continue.
+# Otherwise, before editing: Save. Review the starter files, tick Staged, Commit
 # with message "Add baseline R analysis", then Push. See guide section 2.
 # Include the .Rproj, .R script, README, .gitignore, data, and practice fixtures.
 
@@ -208,7 +238,12 @@ ggsave(
 # A successful Git operation does not establish a valid analysis.
 
 # 15. Commented solutions and interpretation -----------------------------------
-# G01: A clone includes Git history and a remote connection. A ZIP has files.
+# G00A: Git identity labels commits. GitHub authentication authorizes network access.
+# G00B: Initialize creates .git locally; Commit records a snapshot; Push shares
+#       recorded commits with an existing connected remote repository.
+# G00C: origin should name your account's fork. Push updates that fork.
+# G01: Initialize adds Git metadata to an existing folder. Clone obtains files,
+#      Git history, and origin from a remote. A ZIP download supplies files.
 # G02: Baseline year 2007; 142 countries; five continent groups.
 # G03: analysis_year <- 1997. The data and plot change only after rerunning.
 #       Still 142 rows; Oceania mean_life_exp = 78.19 in 1997.

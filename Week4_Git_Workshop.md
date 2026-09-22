@@ -1,6 +1,6 @@
 # Week 4 workshop: RStudio with Git and GitHub
 
-Use this guide for setup and troubleshooting. Once connected, open **Week4_RStudio_Git_Lab.R** and stay in its numbered sections for demonstrations and practice. Tuesday uses sections 0–7. Thursday uses sections 8–14. Section 15 contains commented solutions. Version-control practice uses RStudio buttons and GitHub in a browser.
+Use this guide for setup and troubleshooting. Once connected, open **Week4_RStudio_Git_Lab.R** and stay in its numbered sections for demonstrations and practice. Tuesday uses sections 0–7. Thursday uses sections 8–14. Section 15 contains commented solutions. Use RStudio’s Git pane for everyday work, its built-in Terminal for the commands labeled Terminal, and GitHub in a browser for repository creation and Fork.
 
 ## 0. Before class
 
@@ -11,33 +11,71 @@ Use this guide for setup and troubleshooting. Once connected, open **Week4_RStud
 | GitHub repository | Holds a connected online copy | You can open your own repository |
 | Identity and authentication | Name commits and authorize online access | A test commit and Push succeed |
 
-Git and RStudio are separate installations. Use the [Git installation page](https://git-scm.com/downloads) for your operating system. Windows offers an installer. On macOS, an instructor or campus support can help install Git if it is absent. Finish this before the lab.
+### 0A. Install Git and let RStudio find it
 
-In RStudio, open **Tools > Global Options > Git/SVN** (some macOS versions expose preferences through the RStudio menu). Enable the version-control interface and confirm RStudio finds Git. Restart after installation if needed. The Git tab appears in a project that uses Git; an ordinary `.Rproj` alone is insufficient.
+Git and RStudio are separate installations. In RStudio, choose **Tools > Terminal > New Terminal**, or open the **Terminal** tab beside Console. Type this there and press Enter:
 
-Have `readr`, `dplyr`, and `ggplot2` installed using **Packages > Install**. These are familiar packages from earlier labs.
+```text
+git --version
+```
 
-### One-time commit identity
+A version number means Git is available. If it is missing:
 
-Git attaches a name and email to commits. This is separate from GitHub sign-in. If not configured, install `usethis` through **Packages > Install**. With instructor help, run this R expression once in the **R Console**, replacing both examples with your details:
+- **Windows:** install [Git for Windows](https://gitforwindows.org/). Keep the option that makes Git available to the command line and third-party software. Restart RStudio afterward.
+- **macOS:** the version check may offer to install Apple's command line tools. Complete that installation. If no prompt appears, run `xcode-select --install` in RStudio's Terminal and follow the installer. Restart RStudio afterward.
+
+In **Tools > Global Options > Git/SVN**, enable the version-control interface and confirm a Git executable appears. Some macOS versions put preferences in the RStudio menu. If needed, use Browse to select your installed Git executable. The screenshot shows an example path; your path can differ.
+
+![RStudio Git detection and version-control settings](screenshots/rstudio-git-settings.png)
+
+*Source: Posit RStudio User Guide. Documentation example.*
+
+**Console versus Terminal:** `library(...)` and `usethis::...` are R expressions for the **Console**. Lines beginning with `git` are commands for the **Terminal**. Do not use the R editor's Run button for Terminal commands. The Git pane appears once the open project actually uses Git.
+
+Have `readr`, `dplyr`, and `ggplot2` installed using **Packages > Install**, as in previous labs.
+
+### 0B. Configure and check your local Git identity
+
+Git records an author name and email with each commit. Replace the example values below, then enter one command at a time in **RStudio's Terminal**:
+
+```text
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
+git config --global init.defaultBranch main
+```
+
+Use your own name and a verified GitHub email, or the exact no-reply address from **GitHub > Settings > Emails**. `--global` means the default for your computer's repositories. It does not configure GitHub or sign you in. `init.defaultBranch` applies to repositories you create later; it does not rename an existing branch.
+
+Check the values explicitly:
+
+```text
+git config --get user.name
+git config --get user.email
+git config --get init.defaultBranch
+```
+
+These report the effective settings in the current folder. A repository-specific setting can override a global setting. If a value differs from what you set, ask for help inspecting the local configuration.
+
+**R Console alternative:** install `usethis` using **Packages > Install**, then run these R expressions with your own details. Choose this or the Terminal configuration above; both configure the same Git installation.
 
 ```r
 usethis::use_git_config(
   user.name = "Your Name",
-  user.email = "your GitHub-associated email"
+  user.email = "you@example.com"
 )
+usethis::git_default_branch_configure(name = "main")
 ```
 
-Use the no-reply email shown in your GitHub email settings if preferred. This sets your Git identity for your computer’s projects. The teaching script does not change it automatically. This is setup in R, not a terminal workflow.
+The setup commands are also collected in `Week4_Git_Terminal.txt`. The main R script contains setup prompts and checks; sourcing it never changes Git configuration.
 
 ### One-time GitHub authentication
 
-Create the repository in section 1 first. If a credential manager opens browser sign-in during Clone or Push, complete that sign-in. An ordinary GitHub account password does not authenticate HTTPS Git operations.
+Create your repository or fork using section 1 before authorizing access to it. If a credential manager opens browser sign-in during Clone or Push, complete that sign-in. An ordinary GitHub account password does not authenticate HTTPS Git operations.
 
 If RStudio instead asks for credentials and no working credential manager is available, the instructor can help with a personal access token:
 
 1. On GitHub, open **Settings > Developer settings > Personal access tokens > Fine-grained tokens > Generate new token**.
-2. Choose an expiration, your account as resource owner, and **Only select repositories**, selecting `css-rstudio-practice`.
+2. Choose an expiration, your account as resource owner, and **Only select repositories**, selecting your practice repository. For the website exercise, also select your own website fork, or update the token’s selected repositories later.
 3. Give that repository **Contents: Read and write** access. This exercise edits ordinary files and does not need workflow permissions.
 4. Install `gitcreds` through **Packages > Install**. In the R Console, run `gitcreds::gitcreds_set()` and enter the token only at its interactive credential prompt. Keep it out of scripts, README files, screenshots, and notes. If credentials already exist, read the prompt deliberately rather than replacing another account accidentally.
 5. Retry the operation. If it fails, check the account, repository access, token expiration, and any approval requirement.
@@ -56,9 +94,66 @@ Version control records file changes so we can compare and recover recorded vers
 
 *Pro Git, §1.3, Figure 6. CC BY-NC-SA 3.0. Original labels retained. In RStudio: Save changes the working file; Staged selects a version; Commit records it in local history. The hidden .git directory stores that history. Checkout means putting a recorded version into the working files, as when switching branches.*
 
-## 1. Connect GitHub to an RStudio Project
+## 1. A project folder, a Git repository, and a GitHub copy
 
-A **repository** stores project files and the history Git records through commits. A local repository is on your computer. A remote repository is a connected repository elsewhere; here it is on GitHub. RStudio provides the interface to the local project and Git.
+A **repository** stores project files and the history Git records through commits. The hidden `.git` directory stores local history and settings. An `.Rproj` file stores RStudio project settings. Creating an `.Rproj` alone does not initialize Git.
+
+For the R analysis, choose **Path A or Path B**, not both for the same project. Path C is a separate exercise using the course website template.
+
+| Starting point | Route | Result |
+|---|---|---|
+| Files already on your computer | A. Initialize the folder, commit, then connect an empty GitHub repository | Existing local work gains version control and an online copy |
+| You want a fresh online practice repository | B. Create GitHub repository with README, then clone it | RStudio receives its files, history, and remote connection |
+| Someone else's repository is your starting point | C. Fork on GitHub, then clone your fork | Your own online copy plus a local RStudio project |
+
+### 1A. Turn an existing folder into a Git repository and push it
+
+**Predict:** after Git initialization, what will exist locally? What will still be absent on GitHub?
+
+1. Copy the contents of `starter-project`, including `.gitignore`, into a new folder named **css-rstudio-practice**. Keep it outside the downloaded teaching folder and outside any existing repository. A local folder outside Box, OneDrive, or iCloud avoids synchronization conflicts. For an existing project of your own, use its project folder instead.
+2. In RStudio, choose **File > New Project > Existing Directory**, select that folder, and click **Create Project**. If it already has an `.Rproj`, open that file.
+3. Choose **Tools > Project Options > Git/SVN**. Select **Git** as the version control system, confirm initialization, and allow RStudio to restart the project. This creates `.git` without moving your project files. If the folder already uses Git, skip initialization.
+4. Open `Week4_RStudio_Git_Lab.R`, run sections 1–2, and check the baseline plot. Review `.gitignore`. In the **Git pane**, inspect the starter files, tick **Staged**, click **Commit**, and record **Add baseline R analysis**. Include the `.Rproj`, `.R` script, README, `.gitignore`, data, and practice files. This first commit creates local history.
+5. On GitHub, create a new **Private** repository named **css-rstudio-practice** under your account. Leave **README**, **.gitignore**, and **license** unselected. The repository must be **empty**, because the local folder already has its first commit. Copy the HTTPS URL from **Quick setup**.
+
+![The HTTPS address on an empty GitHub repository](screenshots/github-empty-repo.png)
+
+*Source: GitHub Docs. Example URL; copy your own repository address.*
+
+6. Return to this project's RStudio window and open **Tools > Terminal > New Terminal**. Check where you are before connecting anything:
+
+```text
+pwd
+git rev-parse --show-toplevel
+git status
+git branch --show-current
+git remote -v
+```
+
+The first two commands should identify the practice project folder. If `pwd` is not recognized in Windows Command Prompt, enter `cd` with no arguments to display the current folder. `git status` should show your committed baseline with no pending changes. A new local repository has no remote URL yet. If it names a different project or an existing remote, stop and inspect that setup instead of initializing or replacing it.
+
+7. If this newly created practice repository uses `master` instead of `main`, rename it with `git branch -m main`. Skip that command when it already says `main`. Then, in **Terminal**, replace `YOUR-USERNAME` in the full URL below and run:
+
+```text
+git remote add origin https://github.com/YOUR-USERNAME/css-rstudio-practice.git
+git remote -v
+```
+
+`origin` is a local nickname for the remote URL. Adding it does not upload any files. Check that both displayed URLs belong to **your** GitHub repository before the next command.
+
+```text
+git push -u origin main
+```
+
+This uploads your existing commits and sets local `main` to track `origin/main`. Finish sign-in if prompted, using section 0's authentication instructions. Refresh the GitHub page and check the files, branch, and **Add baseline R analysis** commit. You can now use RStudio's **Push** and **Pull** buttons for ordinary updates.
+
+**Path A check:** Git History shows the baseline locally; GitHub shows the same commit and source files. Initialization, commit, adding a remote, and push are four different actions. Continue to section 2 without creating a second baseline commit.
+
+**Alternative initialization:** if the Project Options menu differs, use `git init -b main` in this folder's RStudio Terminal (Git 2.28 or newer), then reopen its `.Rproj`. Another option is `usethis::use_git()` in the **R Console**. Choose one initialization method, then continue with the Git pane's first commit.
+
+### 1B. Alternative: create on GitHub, then clone in RStudio
+
+This path starts with a repository that already has a README commit on GitHub. Use it instead of Path A for the analysis project.
 
 1. In a browser, sign into GitHub and create `css-rstudio-practice`. Select **Private** and **Add a README file**. Leave the license and Git ignore template unset for now; the starter includes `.gitignore`.
 2. Open **Code > HTTPS** and copy the repository URL.
@@ -73,9 +168,31 @@ A **repository** stores project files and the history Git records through commit
 6. Use Finder or File Explorer to copy the **contents** of the downloaded `starter-project` into the clone. Replace the initial README with the supplied project README. Include `.gitignore` and `data`. Keep the clone-generated `.Rproj`; do not copy another `.Rproj` or a `.git` directory from the teaching folder. On macOS, Command-Shift-period shows hidden files. Alternatively, create `.gitignore` in RStudio’s text editor using the supplied contents.
 7. Open `Week4_RStudio_Git_Lab.R` from this connected folder.
 
-**Check:** script, README, `.Rproj`, and `data` sit together in the clone. Git lists the new files and the branch is `main`. Cloning has configured a remote named `origin`: the connection to your GitHub repository.
+**Path B check:** script, README, `.Rproj`, and `data` sit together in the clone. Git lists the new files and the branch is `main`. Cloning has configured a remote named `origin`: the connection to your GitHub repository.
 
 A clone includes history and a remote connection. A ZIP contains files without Git history. An `.Rproj` establishes RStudio’s working folder; it does not by itself add Git.
+
+### 1C. Fork the course website, then clone your fork
+
+A **fork** is a repository under your GitHub account that begins from someone else's repository. A **clone** brings one remote repository's files and history onto your computer. Forking alone does not put files in RStudio. Downloading a ZIP does not supply Git history or a remote connection.
+
+1. In a browser, open [the course website template](https://github.com/ShuyuanShen/quarto-academic-website-template). Click **Fork**, choose your account as **Owner**, and click **Create fork**. Keep the repository name. If you already have this fork, open it instead of creating another.
+
+![The Fork button on a GitHub repository](screenshots/github-fork.png)
+
+*Source: GitHub Docs. The screenshot is a documentation example.*
+
+2. On **your fork**, click **Code > HTTPS**, then copy the URL. The repository owner in the URL should be your username. In RStudio choose **File > New Project > Version Control > Git**, paste that URL, choose a parent folder outside the analysis project, and click **Create Project**. Keep the template's existing `.Rproj` file.
+3. In this website project's **Terminal**, run `git remote -v` and `git status`. `origin` should point to your own fork. Git history already exists, so no `git init` or `git remote add origin` is needed.
+4. For a small connection check, open **README.md** in RStudio and replace its first heading with **Your Name's website: start here**. Save, inspect **Diff**, stage that file, Commit with **Personalize website README**, and **Push**. Refresh your fork on GitHub and verify the changed heading and commit. This README edit requires no Quarto rendering.
+5. Explain where your Push went. It updates your fork; it does not change the instructor's repository. Forking a website repository also does not publish a live website. The template README explains page editing, rendering, and GitHub Pages for later work.
+6. Reopen your **css-rstudio-practice .Rproj** before continuing the visualization lab. The website project and analysis project are separate repositories.
+
+For a repository you already own or can access, you can clone it directly without a fork. A public repository may allow cloning while still denying Push to someone else's account.
+
+**Terminal alternative to RStudio's clone dialog:** open a Terminal in the chosen **parent** folder, replace `YOUR-FORK-URL` with your fork's full HTTPS URL, and run `git clone YOUR-FORK-URL`. Then open the `.Rproj` inside the newly created folder. If a different repository has no `.Rproj`, use **File > New Project > Existing Directory** there. Do not run both clone methods into the same folder.
+
+**Scope of this exercise:** keep local `main` tracking `origin/main`, your own website fork. Happy Git's advanced contribution workflow also discusses an `upstream` remote and a different tracking arrangement; we do not need those extra steps to personalize this template.
 
 ## 2. Baseline analysis and the Git pane
 
@@ -85,7 +202,7 @@ Run script sections 1–2. The baseline selects 2007, gives 142 country observat
 
 *Posit documentation example. Its filenames and “no branch” state differ from our connected main branch. Pane placement and icons may vary by version.*
 
-Save. In **Git**, inspect the starter files, then tick **Staged** for the script, `.Rproj`, README, `.gitignore`, data, and practice fixtures. Click **Commit**, enter `Add baseline R analysis`, and commit. **Push** and refresh GitHub to verify the files arrived. This is the baseline checkpoint.
+If Path A already created and pushed **Add baseline R analysis**, verify it in History and on GitHub, then continue to section 3. Otherwise, save. In **Git**, inspect the starter files, then tick **Staged** for the script, `.Rproj`, README, `.gitignore`, data, and practice fixtures. Click **Commit**, enter `Add baseline R analysis`, and commit. **Push** and refresh GitHub to verify the files arrived. This is the baseline checkpoint.
 
 ## 3. Save, diff, stage, commit
 
@@ -167,7 +284,7 @@ A **pull request** proposes bringing one branch’s changes into another and pro
 
 A partner can review a private solo repository on the owner’s screen and give verbal feedback. Record it in the PR description. Authors cannot approve their own requests. Separate-account reviews or edits require access granted by the owner. Do not share logins.
 
-A **fork** is a separate repository on GitHub, often used when you cannot contribute directly to an original. Our lab needs no fork.
+A **fork** is a separate repository on GitHub, often used when you cannot contribute directly to an original. The website exercise in section 1C uses a fork. The analysis pull request here stays within your practice repository.
 
 ## 11. Merge, pull, rerun
 
@@ -195,18 +312,21 @@ A partner should find the question, source, year, script, and run instructions, 
 
 | Symptom | Check and next step |
 |---|---|
-| No Git tab | Open the connected `.Rproj`; confirm Git detection in Git/SVN preferences. Reopen the clone rather than initializing the download folder. |
+| No Git tab | Open the connected `.Rproj`; confirm Git detection in Git/SVN preferences. Reopen your practice project. Use section 1A to initialize only an intended local project folder; use section 1C to clone an existing fork. |
 | CSV missing | Open the clone’s `.Rproj`; data/gapminder.csv belongs directly under that folder. |
 | Nothing to commit | Save first; check whether the change is already committed or ignored. |
 | Commit needs identity | Complete section 0’s one-time identity setup. |
-| Push disabled | Check the connected clone, current branch, and remote origin. Ask for help if the connection is absent. |
+| Push disabled | A local-only project needs a first commit, an origin URL, and the first `git push -u origin main` from section 1A. A clone already has origin. |
+| `remote origin already exists` | Inspect `git remote -v`. If it is already the correct repository, skip adding it. Ask for help before changing a different connection. |
+| `src refspec main does not match any` | Check that a first commit exists and inspect the actual branch name. Do not force Push. |
+| New local project cannot push to a nonempty GitHub repo | Path A needs an empty remote. Use a new empty repository or ask for help reconciling histories; do not force Push. |
 | Authentication fails | Check account, token expiration, repository permission, and setup. An account password alone is insufficient for HTTPS Git. |
 | Push rejected because online work is newer | Finish/commit local edits, Pull, inspect and rerun, then Push. Stop for help if a conflict appears. |
 | Branch switch blocked | Save and commit meaningful work, or deliberately discard only an unwanted edit. Switch from a clean state. |
 | Plot still old after Pull | Verify saved source and branch, then rerun sections 1–2 and 6. Environment objects do not update automatically. |
 | Internet unavailable | Continue local analysis, commits, History, and branch practice. Review on screen. Mark online steps unfinished and complete them after access returns. |
 
-For a fully offline start, copy starter-project to a new local folder. Use **File > New Project > Existing Directory**, then **Tools > Project Options > Git/SVN**, select Git, confirm initialization, and restart. Make a local baseline commit. This is local practice without a remote. Later create and clone the online repository; the instructor can help carry over working files. Local comparison does not complete a GitHub pull request.
+For a fully offline start, copy starter-project to a new local folder. Use **File > New Project > Existing Directory**, then **Tools > Project Options > Git/SVN**, select Git, confirm initialization, and restart. Make a local baseline commit. This is local practice without a remote. When online again, keep this same folder and follow section 1A from creating an empty GitHub repository through the first Push. Local comparison does not complete a GitHub pull request.
 
 ## Sources and screenshot credits
 
@@ -223,3 +343,10 @@ The course examples adapt these workflows. Documentation screenshots retain thei
 - Assigned [Git & GitHub Crash Course](https://www.youtube.com/watch?v=mAFoROnOfHs). Huddles retrieve viewing notes; classroom practice uses RStudio.
 
 - Chacon and Straub, [Pro Git §1.1: version control](https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control), [§1.3: What is Git?](https://git-scm.com/book/ms/v2/Getting-Started-What-is-Git%3F), and [§3.2: branching](https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging). Diagrams reproduced from the [official book source](https://github.com/progit/progit2/tree/main/images) under [CC BY-NC-SA 3.0](https://creativecommons.org/licenses/by-nc-sa/3.0/).
+
+### Additional setup references
+
+- [R for the Rest of Us: How to Use Git/GitHub with R](https://rfortherestofus.com/2021/02/how-to-use-git-github-with-r), David Keyes, February 2021. Useful overview of RStudio and `usethis`; use current GitHub documentation for token permissions.
+- [Happy Git: install Git](https://happygitwithr.com/install-git), [introduce yourself to Git](https://happygitwithr.com/hello-git), [existing project, GitHub last](https://happygitwithr.com/existing-github-last), and [fork and clone](https://happygitwithr.com/fork-and-clone).
+- [GitHub: adding local code](https://docs.github.com/en/migrations/importing-source-code/using-the-command-line-to-import-source-code/adding-locally-hosted-code-to-github) and [forking a repository](https://docs.github.com/en/pull-requests/how-tos/work-with-forks/fork-a-repo).
+- Screenshots: [RStudio Git/SVN settings](https://docs.posit.co/ide/user/ide/guide/tools/images/version-control-options.png), [empty repository URL](https://docs.github.com/assets/cb-48146/images/help/repository/copy-remote-repository-url-quick-setup.png), and [Fork button](https://docs.github.com/assets/cb-34352/images/help/repository/fork-button.png). Accessed September 21, 2026.
